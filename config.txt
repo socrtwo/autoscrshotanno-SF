@@ -1,0 +1,5 @@
+Log To Word: Yes
+Log To Word: HTML
+Log.doc
+Log.html
+Turn off Mouse during Screen Capture: No
