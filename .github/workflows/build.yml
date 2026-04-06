@@ -1,0 +1,33 @@
+name: Check Automatic Screenshot Annotator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: AutoIt File Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: List AutoIt scripts
+        run: |
+          echo "AutoIt scripts in this project:"
+          find . -name "*.au3" -exec echo "  {}" \;
+          echo ""
+          echo "AutoIt scripts require Windows + AutoIt runtime to compile/execute."
+          echo "Download AutoIt from: https://www.autoitscript.com/"
+
+      - name: Count lines of code
+        run: |
+          total=0
+          for f in $(find . -name "*.au3"); do
+            lines=$(wc -l < "$f")
+            echo "  $f: $lines lines"
+            total=$((total + lines))
+          done
+          echo "Total: $total lines of AutoIt code"
