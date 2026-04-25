@@ -1,5 +1,10 @@
 # Automatic Screenshot Annotator
 
+<!--PAGES_LINK_BANNER-->
+> 🌐 **Live page:** [https://socrtwo.github.io/autoscrshotanno-SF/](https://socrtwo.github.io/autoscrshotanno-SF/)  
+> 📦 **Releases:** [github.com/socrtwo/autoscrshotanno-SF/releases](https://github.com/socrtwo/autoscrshotanno-SF/releases)
+<!--/PAGES_LINK_BANNER-->
+
 Automatically annotates tutorial screenshots using internal window and button names. Generates annotated screenshots with natural language text overlays — great for creating documentation and tutorials without manual labeling.
 
 ## Screenshots
