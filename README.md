@@ -1,9 +1,18 @@
-# Automatic Screenshot Annotator
+<!--MODERNIZED:v1-->
+# Autoscrshotanno
 
-<!--PAGES_LINK_BANNER-->
-> 🌐 **Live page:** [https://socrtwo.github.io/autoscrshotanno-SF/](https://socrtwo.github.io/autoscrshotanno-SF/)  
-> 📦 **Releases:** [github.com/socrtwo/autoscrshotanno-SF/releases](https://github.com/socrtwo/autoscrshotanno-SF/releases)
-<!--/PAGES_LINK_BANNER-->
+> Migrated from SourceForge via SF2GH Migrator
+
+[![Live page](https://img.shields.io/badge/live-page-ff2e93?style=for-the-badge)](https://socrtwo.github.io/autoscrshotanno-SF/)
+[![Releases](https://img.shields.io/github/v/release/socrtwo/autoscrshotanno-SF?style=for-the-badge&color=7c3aed)](https://github.com/socrtwo/autoscrshotanno-SF/releases)
+[![License](https://img.shields.io/github/license/socrtwo/autoscrshotanno-SF?style=for-the-badge&color=22d3ee)](https://github.com/socrtwo/autoscrshotanno-SF/blob/main/LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/socrtwo/autoscrshotanno-SF?style=for-the-badge&color=34d399)](https://github.com/socrtwo/autoscrshotanno-SF/commits)
+
+🌐 **Live:** https://socrtwo.github.io/autoscrshotanno-SF/  
+📦 **Downloads:** [Releases](https://github.com/socrtwo/autoscrshotanno-SF/releases)  
+📂 **Source:** [socrtwo/autoscrshotanno-SF](https://github.com/socrtwo/autoscrshotanno-SF)
+
+---
 
 Automatically annotates tutorial screenshots using internal window and button names. Generates annotated screenshots with natural language text overlays — great for creating documentation and tutorials without manual labeling.
 
@@ -62,3 +71,25 @@ Contributions are welcome! Feel free to:
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+## 📜 SourceForge heritage
+
+This project originated on **SourceForge** before being migrated to GitHub. The legacy SourceForge entry, if still available, can be searched at:
+
+🔗 https://sourceforge.net/projects/autoscrshotanno/
+
+The repository here at `socrtwo/autoscrshotanno-SF` is the canonical, actively-maintained home. All future updates, issue tracking, and releases happen on GitHub.
+
+## 🛠️ Contributing
+
+Issues and pull requests are welcome at [https://github.com/socrtwo/autoscrshotanno-SF/issues](https://github.com/socrtwo/autoscrshotanno-SF/issues).
+
+## 📝 License
+
+See the [LICENSE](https://github.com/socrtwo/autoscrshotanno-SF/blob/main/LICENSE) file in this repository. If no license file is present, the project is shared as-is for reference and personal use; please contact the maintainer for other use cases.
+
+---
+
+*Maintained by [@socrtwo](https://github.com/socrtwo)*
