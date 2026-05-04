@@ -1,94 +1,96 @@
-<!--MODERNIZED:v1-->
-# Autoscrshotanno
+<!--MODERNIZED:v2-->
+# autoscrshotanno
 
-> Migrated from SourceForge via SF2GH Migrator
+Capture and annotate screenshots — across **Windows, macOS, Linux, ChromeOS, Android, iOS, and the Web**.
 
-[![Live page](https://img.shields.io/badge/live-page-ff2e93?style=for-the-badge)](https://socrtwo.github.io/autoscrshotanno-SF/)
+[![Live app](https://img.shields.io/badge/launch-app-ff2e93?style=for-the-badge)](https://socrtwo.github.io/autoscrshotanno-SF/app/)
 [![Releases](https://img.shields.io/github/v/release/socrtwo/autoscrshotanno-SF?style=for-the-badge&color=7c3aed)](https://github.com/socrtwo/autoscrshotanno-SF/releases)
-[![License](https://img.shields.io/github/license/socrtwo/autoscrshotanno-SF?style=for-the-badge&color=22d3ee)](https://github.com/socrtwo/autoscrshotanno-SF/blob/main/LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/socrtwo/autoscrshotanno-SF?style=for-the-badge&color=34d399)](https://github.com/socrtwo/autoscrshotanno-SF/commits)
+[![License](https://img.shields.io/github/license/socrtwo/autoscrshotanno-SF?style=for-the-badge&color=22d3ee)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/socrtwo/autoscrshotanno-SF/build.yml?style=for-the-badge&color=34d399)](https://github.com/socrtwo/autoscrshotanno-SF/actions)
 
-🌐 **Live:** https://socrtwo.github.io/autoscrshotanno-SF/  
-📦 **Downloads:** [Releases](https://github.com/socrtwo/autoscrshotanno-SF/releases)  
-📂 **Source:** [socrtwo/autoscrshotanno-SF](https://github.com/socrtwo/autoscrshotanno-SF)
+🚀 **Launch:** https://socrtwo.github.io/autoscrshotanno-SF/app/  
+📦 **Download:** [Releases](https://github.com/socrtwo/autoscrshotanno-SF/releases)  
+📂 **Source:** [`socrtwo/autoscrshotanno-SF`](https://github.com/socrtwo/autoscrshotanno-SF)
 
 ---
 
-Automatically annotates tutorial screenshots using internal window and button names. Generates annotated screenshots with natural language text overlays — great for creating documentation and tutorials without manual labeling.
+## What it is
 
-## Screenshots
+A modern, installable PWA for grabbing a screen, window, or tab and annotating it
+with arrows, shapes, text, freehand, or blur/redact regions. Save as PNG, copy
+to clipboard, or export an HTML log of the session.
 
-Visit the [SourceForge project page](https://sourceforge.net/projects/autoscrshotanno/) to view screenshots.
+The original Windows AutoIt build (auto-captures on UI events) is still
+included in the Windows release archive under `legacy/`.
 
-> **Tip:** If you have screenshots to contribute, open a PR adding them to a `screenshots/` folder!
+## Platforms
 
-**Language:** AutoIt  
-**License:** MIT
+| Platform   | Install path |
+|------------|--------------|
+| **Web**        | Open the [live app](https://socrtwo.github.io/autoscrshotanno-SF/app/) |
+| **Windows**    | PWA (Edge/Chrome → Install) **or** legacy `ScreenShotAndAnnotate.exe` |
+| **macOS**      | Safari → File → Add to Dock, **or** Chrome → Install |
+| **Linux**      | Chromium-based browser → Install ScrShotAnno… |
+| **ChromeOS**   | Address-bar install → app launcher |
+| **Android**    | Chrome → Install app, or build a TWA wrapper |
+| **iOS / iPadOS** | Safari → Share → Add to Home Screen |
+
+Pre-built archives for every platform are attached to each [release](https://github.com/socrtwo/autoscrshotanno-SF/releases) — each archive contains the PWA plus platform-specific install notes.
 
 ## Features
 
-- Captures screenshots of any running Windows application
-- Identifies UI elements (buttons, menus, text fields) by their internal names
-- Generates natural language annotations describing each element
-- Exports annotated screenshots as image files
-- Useful for creating documentation and tutorials automatically
+- **Capture** screen, window, or tab via the browser Screen Capture API
+- **Open** any image, or **Paste** from clipboard (Ctrl/Cmd+V)
+- Annotation tools: pen, rectangle, ellipse, arrow, text, blur/redact
+- Color picker, adjustable stroke width, undo, clear
+- **Save PNG**, **Copy to clipboard**, **Export HTML log**
+- Installable as a PWA — works offline after first load
+- Keyboard shortcuts: `Ctrl/Cmd+Alt+C` capture · `Ctrl/Cmd+Z` undo · `Ctrl/Cmd+S` save · `Ctrl/Cmd+V` paste
 
-## System Requirements
+### Legacy Windows build (still shipped)
 
-- Windows XP or later
-- AutoIt v3 (free from [autoitscript.com](https://www.autoitscript.com/))
+The original AutoIt script auto-captures whenever the user changes window,
+right-clicks, or selects a sub-menu, and logs to Word and/or HTML.
 
-## Installation & Usage
+- Hotkeys: `Ctrl+Alt+C` capture · `Ctrl+Alt+P` pause · `Ctrl+Alt+M` toggle mouse · `Ctrl+Alt+X` exit
+- Source: [`ScreenShotAndAnnotate.au3`](ScreenShotAndAnnotate.au3) and [`src/`](src/)
 
-### Running
+## Building releases locally
 
-1. Install [AutoIt](https://www.autoitscript.com/) (free)
-2. Double-click the `.au3` file to run it
+```bash
+bash scripts/build-releases.sh v2.0.0
+ls dist/
+```
 
-### Compiling to .exe
+This produces a zip per platform plus `SHA256SUMS.txt`. The
+[`Release` workflow](.github/workflows/release.yml) runs the same script on tag
+push (`v*`) and uploads the archives to the GitHub Release.
 
-1. Right-click the `.au3` file
-2. Select **Compile Script**
-3. The `.exe` can run on any Windows PC without AutoIt installed
+## Project layout
+
+```
+web/app/             cross-platform PWA (HTML / JS / manifest / service worker)
+web/index.html       landing page (loads README, links to app)
+ScreenShotAndAnnotate.au3, src/, HOOK.DLL, *.exe
+                     legacy AutoIt build (Windows)
+scripts/build-releases.sh  packages dist/ archives for each platform
+.github/workflows/   CI + release automation, GitHub Pages deploy
+```
 
 ## Origin
 
-This project was originally hosted on SourceForge and has been migrated to GitHub for easier access and collaboration.
-
-- **SourceForge:** [autoscrshotanno](https://sourceforge.net/projects/autoscrshotanno/)
-- **Migrated with:** [SF2GH Migrator](https://github.com/socrtwo/sf-to-github)
+Originally hosted on [SourceForge](https://sourceforge.net/projects/autoscrshotanno/),
+migrated via [SF2GH Migrator](https://github.com/socrtwo/sf-to-github). This
+GitHub repo is the canonical home; all updates, issues, and releases happen
+here.
 
 ## Contributing
 
-Contributions are welcome! Feel free to:
-
-1. Fork this repository
-2. Create a feature branch (`git checkout -b my-feature`)
-3. Commit your changes (`git commit -m "Add my feature"`)
-4. Push to the branch (`git push origin my-feature`)
-5. Open a Pull Request
+Pull requests welcome. For substantial changes, please open an issue first.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-## 📜 SourceForge heritage
-
-This project originated on **SourceForge** before being migrated to GitHub. The legacy SourceForge entry, if still available, can be searched at:
-
-🔗 https://sourceforge.net/projects/autoscrshotanno/
-
-The repository here at `socrtwo/autoscrshotanno-SF` is the canonical, actively-maintained home. All future updates, issue tracking, and releases happen on GitHub.
-
-## 🛠️ Contributing
-
-Issues and pull requests are welcome at [https://github.com/socrtwo/autoscrshotanno-SF/issues](https://github.com/socrtwo/autoscrshotanno-SF/issues).
-
-## 📝 License
-
-See the [LICENSE](https://github.com/socrtwo/autoscrshotanno-SF/blob/main/LICENSE) file in this repository. If no license file is present, the project is shared as-is for reference and personal use; please contact the maintainer for other use cases.
+MIT — see [LICENSE](LICENSE).
 
 ---
 

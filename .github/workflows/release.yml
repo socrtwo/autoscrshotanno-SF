@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v2.0.0). Leave blank to use latest tag or v2.0.0.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build platform archives
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            v="${GITHUB_REF_NAME}"
+          else
+            v="${{ github.event.inputs.version }}"
+            if [ -z "$v" ]; then
+              v="$(git describe --tags --abbrev=0 2>/dev/null || echo v2.0.0)"
+            fi
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Version: $v"
+
+      - name: Build release archives
+        run: bash scripts/build-releases.sh "${{ steps.ver.outputs.version }}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-archives
+          path: dist/
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.version }}
+          name: ${{ steps.ver.outputs.version }}
+          generate_release_notes: true
+          body: |
+            ## autoscrshotanno ${{ steps.ver.outputs.version }}
+
+            Cross-platform screenshot capture and annotation. Pick the archive for your platform — each contains the same PWA plus platform-specific install instructions. The Windows archive additionally bundles the legacy AutoIt build.
+
+            | Platform   | Archive |
+            |------------|---------|
+            | Web        | `autoscrshotanno-web-*.zip` |
+            | Windows    | `autoscrshotanno-windows-*.zip` (PWA + legacy `.exe`) |
+            | macOS      | `autoscrshotanno-macos-*.zip` |
+            | Linux      | `autoscrshotanno-linux-*.zip` |
+            | ChromeOS   | `autoscrshotanno-chromeos-*.zip` |
+            | Android    | `autoscrshotanno-android-*.zip` |
+            | iOS/iPadOS | `autoscrshotanno-ios-*.zip` |
+
+            **Live app:** https://socrtwo.github.io/autoscrshotanno-SF/app/
+
+            See `SHA256SUMS.txt` for archive checksums.
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
