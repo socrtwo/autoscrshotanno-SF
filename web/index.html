@@ -135,8 +135,9 @@
       a.textContent = (emoji ? emoji + '  ' : '') + label;
       links.appendChild(a);
     };
+    mk('./app/', 'Launch app', '🚀');
+    mk(repoUrl + '/releases', 'Downloads', '⬇');
     mk(repoUrl, 'Source', '📂');
-    mk(repoUrl + '/releases', 'Releases', '⬇');
     mk(repoUrl + '/issues', 'Issues', '💬');
   } catch (e) { /* ignore */ }
 
