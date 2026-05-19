@@ -5,6 +5,10 @@ on:
     tags: ['v*']
   workflow_dispatch:
     inputs:
+      ref:
+        description: 'Git ref (tag, branch, or SHA) to build from. Leave blank to use the workflow ref.'
+        required: false
+        default: ''
       version:
         description: 'Version tag (e.g. v2.0.0). Leave blank to use latest tag or v2.0.0.'
         required: false
@@ -12,15 +16,19 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build:
     name: Build platform archives
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Resolve version
         id: ver
@@ -39,17 +47,105 @@ jobs:
       - name: Build release archives
         run: bash scripts/build-releases.sh "${{ steps.ver.outputs.version }}"
 
-      - name: Upload build artifacts
+      - name: Extract unsigned Windows staging dir
+        run: |
+          v="${{ steps.ver.outputs.version }}"
+          v="${v#v}"
+          mkdir -p win-unsigned
+          unzip -q "dist/autoscrshotanno-windows-$v.zip" -d win-unsigned
+          rm -f "dist/autoscrshotanno-windows-$v.zip"
+
+      - name: Upload unsigned Windows staging
         uses: actions/upload-artifact@v4
         with:
-          name: release-archives
+          name: windows-unsigned
+          path: win-unsigned/
+
+      - name: Upload non-Windows archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-archives-nonwindows
           path: dist/
+
+  sign-windows:
+    name: Sign Windows binaries
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Download unsigned Windows staging
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-unsigned
+          path: win-unsigned
+
+      - name: Sign Windows binaries (Azure Trusted Signing)
+        uses: azure/trusted-signing-action@v0.5.1
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_TRUSTED_SIGNING_PROFILE }}
+          files-folder: win-unsigned
+          files-folder-filter: exe,msi,dll
+          files-folder-recurse: true
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Re-zip signed Windows archive
+        shell: pwsh
+        run: |
+          $v = "${{ needs.build.outputs.version }}".TrimStart('v')
+          $stageRoot = "win-unsigned"
+          $inner = Get-ChildItem -Path $stageRoot -Directory | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $zipPath = Join-Path (Resolve-Path dist) "autoscrshotanno-windows-$v.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+          Compress-Archive -Path $inner.FullName -DestinationPath $zipPath
+          Write-Host "Created $zipPath"
+
+      - name: Upload signed Windows archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-archives-windows
+          path: dist/
+
+  release:
+    name: Publish GitHub Release
+    needs: [build, sign-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Download non-Windows archives
+        uses: actions/download-artifact@v4
+        with:
+          name: release-archives-nonwindows
+          path: dist
+
+      - name: Download signed Windows archive
+        uses: actions/download-artifact@v4
+        with:
+          name: release-archives-windows
+          path: dist
+
+      - name: Recompute SHA256SUMS.txt
+        run: |
+          cd dist
+          rm -f SHA256SUMS.txt
+          sha256sum *.zip > SHA256SUMS.txt
+          cat SHA256SUMS.txt
 
       - name: Create tag if dispatched manually
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.ver.outputs.version }}
+          TAG: ${{ needs.build.outputs.version }}
         run: |
           if ! git rev-parse "$TAG" >/dev/null 2>&1; then
             git tag "$TAG"
@@ -59,11 +155,11 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.ver.outputs.version }}
-          name: ${{ steps.ver.outputs.version }}
+          tag_name: ${{ needs.build.outputs.version }}
+          name: ${{ needs.build.outputs.version }}
           generate_release_notes: true
           body: |
-            ## autoscrshotanno ${{ steps.ver.outputs.version }}
+            ## autoscrshotanno ${{ needs.build.outputs.version }}
 
             Cross-platform screenshot capture and annotation. Pick the archive for your platform — each contains the same PWA plus platform-specific install instructions. The Windows archive additionally bundles the legacy AutoIt build.
 
