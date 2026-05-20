@@ -22,9 +22,10 @@ canonical user-facing app — assume edits there unless told otherwise.
 working on a feature branch:
 
 1. Commit and push the feature branch.
-2. Merge into `main` (fast-forward when possible) and push `main` so Pages
-   and Release pipelines fire.
-3. Leave the feature branch alone — the maintainer decides when to delete it.
+2. **Open a PR from the feature branch to `main`** using the GitHub MCP
+   tools (`mcp__github__create_pull_request`). Do not merge directly —
+   the maintainer reviews and merges.
+3. Pages and Release pipelines fire only after the PR lands on `main`.
 
 ## Releasing
 
