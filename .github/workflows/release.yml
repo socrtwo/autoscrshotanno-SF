@@ -12,10 +12,44 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
+  sign-windows:
+    runs-on: windows-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Azure login (OIDC, no stored secret)
+        if: vars.AZURE_TENANT_ID != ''
+        uses: azure/login@v2
+        with:
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Sign Windows binaries with Azure Trusted Signing
+        if: vars.AZURE_TENANT_ID != ''
+        uses: azure/trusted-signing-action@v0.5.1
+        with:
+          endpoint: ${{ vars.TS_ENDPOINT }}
+          trusted-signing-account-name: ${{ vars.TS_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ vars.TS_CERT_PROFILE }}
+          files-folder: .
+          files-folder-filter: exe
+          files-folder-recurse: true
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+      - name: Upload signed exe
+        if: vars.AZURE_TENANT_ID != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-windows-exe
+          path: ./**/*.exe
+
   build:
     name: Build platform archives
+    needs: sign-windows
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +69,13 @@ jobs:
           fi
           echo "version=$v" >> "$GITHUB_OUTPUT"
           echo "Version: $v"
+
+      - name: Use signed Windows exe if available
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: signed-windows-exe
+          path: .
 
       - name: Build release archives
         run: bash scripts/build-releases.sh "${{ steps.ver.outputs.version }}"
