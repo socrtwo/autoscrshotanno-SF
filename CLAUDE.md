@@ -1,50 +1,56 @@
 # CLAUDE.md
 
-Project conventions for Claude Code sessions on this repo.
+A cross-platform screenshot + annotation PWA, plus a legacy AutoIt Windows
+build kept for the Windows release archive. The PWA under `web/app/` is the
+canonical user-facing app — assume edits there unless told otherwise.
+
+## Repo map
+
+- `web/app/` — the PWA: `index.html`, `app.js`, `manifest.webmanifest`,
+  `service-worker.js`, icons. Ships to GitHub Pages and into every release zip.
+- `web/index.html` — landing page that loads `README.md` and links to the app.
+- `ScreenShotAndAnnotate.au3`, `src/`, `HOOK.DLL`, `*.exe` — legacy AutoIt
+  build. Only bundled in the Windows release archive under `legacy/`.
+- `scripts/build-releases.sh` — release packager; produces per-platform zips
+  and `SHA256SUMS.txt` in `dist/`.
+- `.github/workflows/` — `build.yml` (CI), `pages.yml` (deploy on push to
+  `main`), `release.yml` (publish on `v*` tag).
 
 ## Branch policy
 
-**Always merge feature branches to `main` when work is complete.** This repo
-deploys from `main`:
+`main` is the deploy branch — both Pages and Releases trigger from it. When
+working on a feature branch:
 
-- `.github/workflows/pages.yml` triggers on push to `main` and rebuilds the
-  GitHub Pages site (including `/app/`).
-- `.github/workflows/release.yml` triggers on `v*` tag push from `main`.
+1. Commit and push the feature branch.
+2. **Open a PR from the feature branch to `main`** using the GitHub MCP
+   tools (`mcp__github__create_pull_request`). Do not merge directly —
+   the maintainer reviews and merges.
+3. Pages and Release pipelines fire only after the PR lands on `main`.
 
-If a session is asked to develop on a feature branch:
+## Releasing
 
-1. Develop, commit, and push to the feature branch.
-2. **Merge the branch into `main`** (fast-forward when possible) and push
-   `main` so Pages and Release pipelines can fire.
-3. Do not delete the feature branch automatically — leave that decision to
-   the maintainer.
+- Local build: `bash scripts/build-releases.sh vX.Y.Z` → `dist/`.
+- Publish: push a `v*` tag to `main`, or run **Actions → Release →
+  workflow_dispatch** (it tags and publishes).
+- Platform archives produced: `web`, `windows` (also includes the legacy
+  AutoIt build), `macos`, `linux`, `chromeos`, `android`, `ios`, plus
+  `source` and `SHA256SUMS.txt`.
 
-## Releases
+## Verifying changes
 
-- Build artifacts: `bash scripts/build-releases.sh vX.Y.Z` produces per-platform
-  zips in `dist/`.
-- Publish: push a `v*` tag to `main`, or run the **Release** workflow via
-  Actions → workflow_dispatch (it creates the tag and publishes).
-- Platform archives: `web`, `windows` (also bundles legacy AutoIt build),
-  `macos`, `linux`, `chromeos`, `android`, `ios`, plus `source` and
-  `SHA256SUMS.txt`.
-
-## Code layout
-
-- `web/app/` — cross-platform PWA (HTML/JS/manifest/service worker). The
-  user-facing app. Edits here ship to GitHub Pages and to every release zip.
-- `web/index.html` — landing page that loads the README and links to the app.
-- `ScreenShotAndAnnotate.au3`, `src/`, `HOOK.DLL`, `*.exe` — legacy AutoIt
-  Windows build. Only ships in the Windows release archive.
-- `scripts/build-releases.sh` — release packager.
-- `.github/workflows/` — `build.yml` (CI), `pages.yml` (deploy), `release.yml`
-  (publish).
+The PWA has no test suite. After touching `web/app/`, open `web/app/index.html`
+locally (or serve via `python3 -m http.server`) and exercise the capture +
+annotate flow. Service worker changes need a hard reload or cache clear to
+take effect.
 
 ## Gotchas
 
-- `bash printf '-foo'` treats `-foo` as a flag. Use `printf '%s' '-foo'` or a
-  heredoc when emitting strings that begin with `-` (e.g. CSS `-webkit-…`).
-- The PWA's screen capture relies on `navigator.mediaDevices.getDisplayMedia`,
-  which requires HTTPS or localhost. Pages serves over HTTPS — fine.
+- `printf '-foo'` treats `-foo` as a flag. Use `printf '%s' '-foo'` or a
+  heredoc when emitting strings beginning with `-` (e.g. CSS `-webkit-…`).
+- `navigator.mediaDevices.getDisplayMedia` requires HTTPS or localhost. Pages
+  serves over HTTPS, so production is fine — local testing needs `localhost`,
+  not `file://`.
 - iOS Safari does not expose `getDisplayMedia`. The app falls back to
-  Open / Paste on that platform; do not remove those code paths.
+  Open / Paste on that platform — don't remove those code paths.
+- Bumping anything cached by the service worker? Bump the cache version in
+  `web/app/service-worker.js` or clients will serve stale assets.
